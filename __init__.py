@@ -105,6 +105,9 @@ def includeme(config):
     global DBSession
     settings = config.registry.settings
     ROOT_URL = settings.get('auto_hq.root_url')
+    _vroot = settings.get('auto_hq.virtual_root', '')
+    if _vroot and ROOT_URL.startswith(_vroot):
+        ROOT_URL = ROOT_URL[len(_vroot):]
 
     dbsession_path = settings.get('auto_hq.dbsession')
     _module, _var = dbsession_path.rsplit('.', 1)
@@ -126,6 +129,7 @@ def includeme(config):
         model = getattr(module, model_name)
         register_model(config, model, actions=actions)
 
+    print ROOT_URL
     config.add_route('auto_hq',
                      ROOT_URL.rstrip('/') + '/*traverse',
                      factory=AutoHQResource)
