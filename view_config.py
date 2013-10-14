@@ -45,6 +45,12 @@ def _auto_model_view_cls(model):
     cls_name = model.__name__ + '_ModelView'
     if cls_name not in _AUTO_CLASSES:
         _AUTO_CLASSES[cls_name] = type(cls_name, (ModelView,), {})
+
+    try:
+        _AUTO_CLASSES[cls_name].__acl__ = model.__hq_acl__
+    except AttributeError:
+        pass
+
     return _AUTO_CLASSES[cls_name]
 
 def _auto_model_resource(model, object_resource):
@@ -53,6 +59,12 @@ def _auto_model_resource(model, object_resource):
         _AUTO_CLASSES[cls_name] = type(cls_name, (ModelResource,), {
             '__object_resource__': object_resource
         })
+
+    try:
+        _AUTO_CLASSES[cls_name].__acl__ = model.__hq_acl__
+    except AttributeError:
+        pass
+
     return _AUTO_CLASSES[cls_name]
 
 def _auto_object_resource(model):
