@@ -137,7 +137,8 @@ def includeme(config):
                      factory=AutoHQResource)
     config.add_view(index_view, context=AutoHQResource,
                     route_name='auto_hq',
-                    renderer='auto_hq/index.mak')
+                    renderer='auto_hq/index.mak',
+                    permission='list',)
 
 from model_view import ModelView
 from view_config import _auto_object_resource as get_object_resource
