@@ -74,7 +74,7 @@
                 % endif
                 % if 'delete' in view.actions:
                 <a class="cmd-delete" href="${request.resource_url(request.context[e.id], 'delete')}"
-                   data-message="Do you want to delete ${view.Resource.__name__} ${e}">
+                   data-message="Do you want to delete ${view.Object.__name__} ${e}">
                     <span class="glyphicon glyphicon-remove"></span></a>
                 % endif
             </td>
