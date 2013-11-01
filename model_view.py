@@ -4,7 +4,7 @@ __author__ = 'tarzan'
 from pyramid.decorator import reify
 from pyramid_simpleform import Form
 from pyramid.renderers import render_to_response
-from vgid_util.bootstrap_renderer import HorizontalFormRenderer
+from lib.bootstrap_renderer import HorizontalFormRenderer
 from pyramid.httpexceptions import HTTPNotFound, HTTPFound
 from webhelpers.paginate import Page, PageURL_WebOb
 from . import AutoHQResource, ModelResource

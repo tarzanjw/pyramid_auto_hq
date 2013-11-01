@@ -4,7 +4,8 @@ __author__ = 'Tarzan'
 import re
 import importlib
 from pyramid.url import urlencode
-
+from pyramid.security import Allow, ALL_PERMISSIONS
+from models import HQUser
 
 ROOT_URL = None
 DBSession = None
@@ -12,6 +13,10 @@ DBSession = None
 class AutoHQResource(object):
     __parent__ = None
     __name__ = None
+
+    __acl__ = [
+        (Allow, HQUser.GROUP_SUPER_SAIYAN, ALL_PERMISSIONS),
+    ]
 
     children = {}
 
@@ -73,11 +78,6 @@ class ObjectResource(object):
     def __str__(self):
         return self.__model__.__name__ + '#' + self.__name__
 
-def index_view(request):
-    return {
-        'models': AutoHQResource.children,
-    }
-
 import view_config
 
 def register_model(config, model, path=None, actions=None):
@@ -111,7 +111,6 @@ def includeme(config):
     else:
         root_route = ROOT_URL
 
-
     dbsession_path = settings.get('auto_hq.dbsession')
     _module, _var = dbsession_path.rsplit('.', 1)
     _module = importlib.import_module(_module, package=None)
@@ -135,6 +134,7 @@ def includeme(config):
     config.add_route('auto_hq',
                      root_route.rstrip('/') + '/*traverse',
                      factory=AutoHQResource)
+    from views import index_view
     config.add_view(index_view, context=AutoHQResource,
                     route_name='auto_hq',
                     renderer='auto_hq/index.mak',

@@ -2,8 +2,10 @@
 __author__ = 'tarzan'
 
 from . import ModelResource, AutoHQResource, ObjectResource
-from vgid_util import text
+from lib import text
 from model_view import ModelView
+from pyramid.security import Allow, ALL_PERMISSIONS
+from pyramid_auto_hq.models import HQUser
 
 def get_model_url_path(model):
     """
@@ -49,7 +51,9 @@ def _auto_model_view_cls(model):
     try:
         _AUTO_CLASSES[cls_name].__acl__ = model.__hq_acl__
     except AttributeError:
-        pass
+        _AUTO_CLASSES[cls_name].__acl__ = [
+            (Allow, HQUser.GROUP_SUPER_SAIYAN, ALL_PERMISSIONS)
+        ]
 
     return _AUTO_CLASSES[cls_name]
 
@@ -63,7 +67,9 @@ def _auto_model_resource(model, object_resource):
     try:
         _AUTO_CLASSES[cls_name].__acl__ = model.__hq_acl__
     except AttributeError:
-        pass
+        _AUTO_CLASSES[cls_name].__acl__ = [
+            (Allow, HQUser.GROUP_SUPER_SAIYAN, ALL_PERMISSIONS)
+        ]
 
     return _AUTO_CLASSES[cls_name]
 
