@@ -8,7 +8,7 @@ from lib.bootstrap_renderer import HorizontalFormRenderer
 from pyramid.httpexceptions import HTTPNotFound, HTTPFound
 from webhelpers.paginate import Page, PageURL_WebOb
 from . import AutoHQResource, ModelResource
-from sqlalchemy.orm.properties import RelationProperty
+from sqlalchemy.orm.properties import RelationProperty, ColumnProperty
 from sqlalchemy.orm.attributes import InstrumentedAttribute
 import inspect
 
@@ -101,7 +101,18 @@ class ModelView(object):
 
     @property
     def obj_attr_names(self):
-        return [c.name for c in self.Object.__table__.columns]
+        attr_names = dir(self.Object)
+        c2a = {}
+        for name in attr_names:
+            attr = getattr(self.Object, name)
+            if not isinstance(attr, InstrumentedAttribute):
+                continue
+            p = attr.property
+            if not isinstance(p, ColumnProperty):
+                continue
+            c2a[p.expression.name] = name
+        col_names = [c.name for c in self.Object.__table__.columns]
+        return map(c2a.__getitem__, col_names)
 
     def _get_object(self):
         if not isinstance(self.request.context, self.Resource):

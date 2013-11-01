@@ -87,7 +87,6 @@ def get_user_callback_for_auth_policy(user_id, request):
     if user is None:
         return None
     request.__hq_user__ = user
-    print user.principals
     return user.principals
 
 def get_user_for_request(request):
