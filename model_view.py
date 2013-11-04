@@ -10,6 +10,7 @@ from webhelpers.paginate import Page, PageURL_WebOb
 from . import AutoHQResource, ModelResource
 from sqlalchemy.orm.properties import RelationProperty, ColumnProperty
 from sqlalchemy.orm.attributes import InstrumentedAttribute
+from pyramid.decorator import reify
 import inspect
 
 class ModelView(object):
@@ -98,6 +99,24 @@ class ModelView(object):
     def __call__(self, request):
         self.request = request
         return self
+
+    @reify
+    def _c2a_mapping(self):
+        attr_names = dir(self.Object)
+        c2a = {}
+        for name in attr_names:
+            attr = getattr(self.Object, name)
+            if not isinstance(attr, InstrumentedAttribute):
+                continue
+            p = attr.property
+            if not isinstance(p, ColumnProperty):
+                continue
+            c2a[p.expression.name] = name
+        return c2a
+
+    def column_to_attribute(self, col_name):
+        assert col_name in self._c2a_mapping, "Table %s does not have column %s" % (self.Object.__table__.name, col_name)
+        return self._c2a_mapping[col_name]
 
     @property
     def obj_attr_names(self):
@@ -269,7 +288,7 @@ class ModelView(object):
             self.DBSession.add(obj)
             self.DBSession.flush()
             obj_cxt = self.request.context[obj.id]
-            self.request.session.flash('%s #%s was created sucessfully.' % (self.object_name, obj))
+            self.request.session.flash(u'%s #%s was created sucessfully.' % (self.object_name, obj))
             return HTTPFound(self.request.resource_url(obj_cxt))
 
         return {
@@ -293,7 +312,7 @@ class ModelView(object):
             self.DBSession.merge(obj)
             self.DBSession.flush()
             obj_cxt = self.request.context
-            self.request.session.flash('%s #%s was updated sucessfully.' % (self.object_name, obj))
+            self.request.session.flash(u'%s #%s was updated sucessfully.' % (self.object_name, obj))
             return HTTPFound(self.request.resource_url(obj_cxt))
 
         return {
@@ -305,7 +324,7 @@ class ModelView(object):
         obj = self._get_object()
         self.DBSession.delete(obj)
         self.DBSession.flush()
-        self.request.session.flash('%s #%s was history!' % (self.object_name, self.request.context.__name__))
+        self.request.session.flash(u'%s #%s was history!' % (self.object_name, self.request.context.__name__))
         return HTTPFound(self.request.resource_url(self.request.context.__parent__))
 
     def no_schema(self):
