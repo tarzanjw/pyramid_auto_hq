@@ -25,18 +25,19 @@
     col_types = {}
 
     for col in obj.__table__.columns:
+        attr_name = view.column_to_attribute(col.name)
         if col.name == 'id':
-            col_types['id'] = 'id'
+            col_types[attr_name] = 'id'
         elif isinstance(col.type, types.String):
-            col_types[col.name] = 'string'
+            col_types[attr_name] = 'string'
         elif isinstance(col.type, types.Boolean):
-            col_types[col.name] = 'bool'
+            col_types[attr_name] = 'bool'
         elif isinstance(col.type, types.Integer) or isinstance(col.type, types.Numeric):
-            col_types[col.name] = 'numeric'
+            col_types[attr_name] = 'numeric'
         elif isinstance(col.type, types.Date) or isinstance(col.type, types.DateTime):
-            col_types[col.name] = 'datetime'
+            col_types[attr_name] = 'datetime'
         else:
-            col_types[col.name] = 'general'
+            col_types[attr_name] = 'general'
 %>
 <table class="table table-striped table-bordered table-condensed table-objects">
     <thead>
