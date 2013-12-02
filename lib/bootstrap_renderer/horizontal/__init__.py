@@ -3,10 +3,7 @@ __author__ = 'tarzan'
 from .. import FormRenderer, FormRendererMetaClass, RowRenderer
 
 class HorizontalRowRenderer(RowRenderer):
-    def _form_group(self, name, controls, id=None,  **attrs):
-        label = attrs['label'] if 'label' in attrs \
-            else ' '.join([word.capitalize() for word in name.split('_')])
-
+    def _render_error(self, name):
         form_renderer = self.form_renderer
         if form_renderer.is_error(name):
             error_list = form_renderer.errors_for(name)
@@ -17,9 +14,15 @@ class HorizontalRowRenderer(RowRenderer):
                                           u'</span>' % (id, err)
             error_css = u' has-error'
         else:
-            error_html = ''
-            error_css = ''
+            error_html = u''
+            error_css = u''
+        return error_html, error_css
 
+    def _form_group(self, name, controls, id=None,  **attrs):
+        label = attrs['label'] if 'label' in attrs \
+            else ' '.join([word.capitalize() for word in name.split('_')])
+
+        error_html, error_css = self._render_error(name)
         return u"""
 <div class="form-group%(error_css)s">
     <label class="col-lg-2 control-label" for="%(id)s">%(label)s</label>
@@ -51,6 +54,7 @@ class HorizontalRowRenderer(RowRenderer):
 from smart_input_row import SmartHorizontalInputRowRenderer
 from radiogroup_row import RadioGroupRowRenderer
 from checkboxlist_row import HorizontalCheckboxListRowRenderer
+from checkbox_row import CheckBoxRowRenderer
 
 class HorizontalFormRenderer(FormRenderer):
     __metaclass__ = FormRendererMetaClass
@@ -58,7 +62,7 @@ class HorizontalFormRenderer(FormRenderer):
     smart_input_row = SmartHorizontalInputRowRenderer()
     text_row = HorizontalRowRenderer('text')
     select_row = HorizontalRowRenderer('select')
-    checkbox_row = HorizontalRowRenderer('checkbox')
+    checkbox_row = CheckBoxRowRenderer()
     textarea_row = HorizontalRowRenderer('textarea', rows=5)
     checkboxlist_row = HorizontalCheckboxListRowRenderer()
     radiogroup_row = RadioGroupRowRenderer()
