@@ -42,12 +42,12 @@
 <table class="table table-striped table-bordered table-condensed table-objects">
     <thead>
         <tr>
+            <th>Commands</th>
         % for name in view.list_attr_names:
             <th class="col-type-${col_types[name]}">
                 ${' '.join([word.capitalize() for word in name.split('_')])}
             </th>
         % endfor
-            <th>Commands</th>
         </tr>
     </thead>
     <tbody>
@@ -59,11 +59,6 @@
             r = request.context[e.id]
         %>
         <tr>
-        % for name in view.list_attr_names:
-            <td class="col-type-${col_types[name]}">
-                ${e.__getattribute__(name)}
-            </td>
-        % endfor
             <td class="col-type-commands">
                 % if 'detail' in view.actions:
                 <a href="${request.resource_url(request.context[e.id])}">
@@ -79,6 +74,11 @@
                     <span class="glyphicon glyphicon-remove"></span></a>
                 % endif
             </td>
+        % for name in view.list_attr_names:
+            <td class="col-type-${col_types[name]}">
+                ${e.__getattribute__(name)}
+            </td>
+        % endfor
         </tr>
     % endfor
     </tbody>
