@@ -1,23 +1,30 @@
 __author__ = 'tarzan'
 
 from .. import FormRenderer, FormRendererMetaClass, RowRenderer
+from webhelpers.html.builder import format_attrs
 
 class HorizontalRowRenderer(RowRenderer):
     def _render_error(self, name, **attrs):
         return self.form_renderer._render_error(name, **attrs)
 
     def _form_group(self, name, controls, id=None,  **attrs):
-        label = attrs['label'] if 'label' in attrs \
-            else ' '.join([word.capitalize() for word in name.split('_')])
+        attrs = self.form_renderer.attributes_for_row(**attrs)
+        try:
+            label = attrs['label']
+            del attrs['label']
+        except KeyError:
+            label = ' '.join([word.capitalize() for word in name.split('_')])
 
         try:
             class_ = attrs['class_'] + ' form-group'
+            del attrs['class_']
         except KeyError:
             class_ = 'form-group'
 
+        attrs_html = format_attrs(**attrs)
         error_html, error_css = self._render_error(name, id=id, **attrs)
         return u"""
-<div class="%(classes)s%(error_css)s">
+<div class="%(classes)s%(error_css)s" %(attrs_html)s>
     <label class="col-lg-2 control-label" for="%(id)s">%(label)s</label>
     <div class="col-lg-10">
         %(controls)s
@@ -27,6 +34,7 @@ class HorizontalRowRenderer(RowRenderer):
 """ % {
             'classes': class_,
             'error_css': error_css,
+            'attrs_html': attrs_html,
             'label': label,
             'id': id,
             'controls': controls,
@@ -45,8 +53,11 @@ class HorizontalRowRenderer(RowRenderer):
             except KeyError:
                 pass
 
-        attrs['class_'] = attrs['class_'] + ' form-control' \
-            if 'class_' in attrs else 'form-control'
+        attrs = self.form_renderer.attributes_for_input(**attrs)
+        try:
+            attrs['class_'] = attrs['class_'] + ' form-control'
+        except KeyError:
+            attrs['class_'] = 'form-control'
         return getattr(self.form_renderer, self.input_name)(name, **attrs)
 
     def __call__(self, name, **attrs):
@@ -60,6 +71,8 @@ from checkbox_row import CheckBoxRowRenderer
 
 class HorizontalFormRenderer(FormRenderer):
     __metaclass__ = FormRendererMetaClass
+
+    _input_attrs = ['id', 'options', 'selected_value',]
 
     def populate_input_id(self, name, **attrs):
         try:
@@ -84,6 +97,19 @@ class HorizontalFormRenderer(FormRenderer):
             error_html = u''
             error_css = u''
         return error_html, error_css
+
+    def attributes_for_row(self, **attrs):
+        return {k:v for k,v in attrs.items() if k not in self._input_attrs}
+
+    def attributes_for_input(self, **attrs):
+        _attrs = {}
+        for k, v in attrs.items():
+            if k in self._input_attrs:
+                _attrs[k] = v
+            if k.startswith('input_'):
+                _attrs[k[6:]] = v
+
+        return _attrs
 
     smart_input_row = SmartHorizontalInputRowRenderer()
     text_row = HorizontalRowRenderer('text')
