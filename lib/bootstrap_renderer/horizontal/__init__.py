@@ -3,20 +3,8 @@ __author__ = 'tarzan'
 from .. import FormRenderer, FormRendererMetaClass, RowRenderer
 
 class HorizontalRowRenderer(RowRenderer):
-    def _render_error(self, name):
-        form_renderer = self.form_renderer
-        if form_renderer.is_error(name):
-            error_list = form_renderer.errors_for(name)
-            error_html = ""
-            for err in error_list:
-                error_html = error_html + u'<span style="" id="%s_em_" class="help-block">' \
-                                            u'<small><em>%s</em></small>' \
-                                          u'</span>' % (id, err)
-            error_css = u' has-error'
-        else:
-            error_html = u''
-            error_css = u''
-        return error_html, error_css
+    def _render_error(self, name, **attrs):
+        return self.form_renderer._render_error(name, **attrs)
 
     def _form_group(self, name, controls, id=None,  **attrs):
         label = attrs['label'] if 'label' in attrs \
@@ -27,7 +15,7 @@ class HorizontalRowRenderer(RowRenderer):
         except KeyError:
             class_ = 'form-group'
 
-        error_html, error_css = self._render_error(name)
+        error_html, error_css = self._render_error(name, id=id, **attrs)
         return u"""
 <div class="%(classes)s%(error_css)s">
     <label class="col-lg-2 control-label" for="%(id)s">%(label)s</label>
@@ -49,7 +37,7 @@ class HorizontalRowRenderer(RowRenderer):
         for k, v in self.default_attrs.items():
             attrs.setdefault(k, v)
         try:
-            attrs['class_'] = attrs['input_class']
+            attrs['class_'] = attrs['in`put_class']
             del attrs['input_class']
         except KeyError:
             try:
@@ -62,8 +50,7 @@ class HorizontalRowRenderer(RowRenderer):
         return getattr(self.form_renderer, self.input_name)(name, **attrs)
 
     def __call__(self, name, **attrs):
-        if 'id' not in attrs or not attrs['id']:
-            attrs['id'] = 'input_%s' % name
+        attrs['id'] = self.form_renderer.populate_input_id(name, **attrs)
         return self._form_group(name, self.render_control(name, **attrs), **attrs)
 
 from smart_input_row import SmartHorizontalInputRowRenderer
@@ -73,6 +60,30 @@ from checkbox_row import CheckBoxRowRenderer
 
 class HorizontalFormRenderer(FormRenderer):
     __metaclass__ = FormRendererMetaClass
+
+    def populate_input_id(self, name, **attrs):
+        try:
+            id_ = attrs['id']
+            if not id_:
+                raise KeyError
+        except KeyError:
+            id_ = 'input_%s' % name
+        return id_
+
+    def _render_error(self, name, **attrs):
+        id = self.populate_input_id(name, **attrs)
+        if self.is_error(name):
+            error_list = self.errors_for(name)
+            error_html = ""
+            for err in error_list:
+                error_html = error_html + u'<span style="" id="%s_em_" class="help-block">' \
+                                            u'<small><em>%s</em></small>' \
+                                          u'</span>' % (id, err)
+            error_css = u' has-error'
+        else:
+            error_html = u''
+            error_css = u''
+        return error_html, error_css
 
     smart_input_row = SmartHorizontalInputRowRenderer()
     text_row = HorizontalRowRenderer('text')

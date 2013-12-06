@@ -24,7 +24,7 @@ class RadioGroupRowRenderer(HorizontalRowRenderer):
         selected_value = self.form.data.get(name, None)
         checkboxes = []
         class_ = 'radio-inline' if inline else 'radio'
-        id = attrs['id'] if 'id' in attrs else 'input_' + name
+        id = attrs['id'] = self.form_renderer.populate_input_id(name, **attrs)
         i = 0
         for value, label in options:
             check = u' checked' if value == selected_value else ''

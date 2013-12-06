@@ -34,7 +34,7 @@ class HorizontalCheckboxListRowRenderer(HorizontalRowRenderer):
                                              add_repetitions=False)
         checkboxes = []
         class_ = 'checkbox-inline' if self.inline else 'checkbox'
-        id = attrs['id'] if 'id' in attrs else 'input_' + name
+        id = self.form_renderer.populate_input_id(name, **attrs)
         i = 0
         checked_values = self._get_checked_values(name)
         for name, value in n2v.items():

@@ -11,8 +11,7 @@ class CheckBoxRowRenderer(HorizontalRowRenderer):
         super(CheckBoxRowRenderer, self).__init__(input_name, **default_attrs)
 
     def __call__(self, name, **attrs):
-        if 'id' not in attrs or not attrs['id']:
-            attrs['id'] = 'input_%s' % name
+        attrs['id'] = self.form_renderer.populate_input_id(name, **attrs)
         for k, v in self.default_attrs.items():
             attrs.setdefault(k, v)
         try:
@@ -29,7 +28,7 @@ class CheckBoxRowRenderer(HorizontalRowRenderer):
             del attrs['input_class']
         except KeyError:
             pass
-        error_html, error_css = self._render_error(name)
+        error_html, error_css = self._render_error(name, **attrs)
 
         print self.form.data[name]
 
