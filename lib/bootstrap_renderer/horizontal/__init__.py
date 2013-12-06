@@ -22,9 +22,14 @@ class HorizontalRowRenderer(RowRenderer):
         label = attrs['label'] if 'label' in attrs \
             else ' '.join([word.capitalize() for word in name.split('_')])
 
+        try:
+            class_ = attrs['class_'] + ' form-group'
+        except KeyError:
+            class_ = 'form-group'
+
         error_html, error_css = self._render_error(name)
         return u"""
-<div class="form-group%(error_css)s">
+<div class="%(classes)s%(error_css)s">
     <label class="col-lg-2 control-label" for="%(id)s">%(label)s</label>
     <div class="col-lg-10">
         %(controls)s
@@ -32,6 +37,7 @@ class HorizontalRowRenderer(RowRenderer):
     </div>
 </div>
 """ % {
+            'classes': class_,
             'error_css': error_css,
             'label': label,
             'id': id,
@@ -42,6 +48,15 @@ class HorizontalRowRenderer(RowRenderer):
     def render_control(self, name, **attrs):
         for k, v in self.default_attrs.items():
             attrs.setdefault(k, v)
+        try:
+            attrs['class_'] = attrs['input_class']
+            del attrs['input_class']
+        except KeyError:
+            try:
+                del attrs['class_']
+            except KeyError:
+                pass
+
         attrs['class_'] = attrs['class_'] + ' form-control' \
             if 'class_' in attrs else 'form-control'
         return getattr(self.form_renderer, self.input_name)(name, **attrs)
