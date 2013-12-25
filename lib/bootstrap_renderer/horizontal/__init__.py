@@ -108,30 +108,3 @@ class HorizontalFormRenderer(FormRenderer):
     textarea_row = HorizontalRowRenderer('textarea', rows=5)
     checkboxlist_row = HorizontalCheckboxListRowRenderer()
     radiogroup_row = RadioGroupRowRenderer()
-
-    @property
-    def js_to_show_errors(self):
-        return """<script type="text/javascript">
-jQuery(function ($) {
-    $.fn.show_error_for_field = function(field, err_msg) {
-        var $form = $(this)
-        var $input = $form.find("[name=" + field + "]")
-        $input.each(function (idx, el) {
-            var $el = $(el)
-            var $frmGrp = $el.parents(".form-group").first()
-            var $err = $frmGrp.find(".help-block")
-            $frmGrp.addClass("has-error")
-            $err.html("<small><em>" + err_msg + "</em></small>")
-        })
-    }
-
-    $.fn.show_errors = function (errors) {
-        var fn, err_msg
-        for (i=0;i<errors.length;i++) {
-            fn = errors[i][0]
-            err_msg = errors[i][1]
-            $(this).show_error_for_field(fn, err_msg)
-        }
-    }
-})
-</script>"""

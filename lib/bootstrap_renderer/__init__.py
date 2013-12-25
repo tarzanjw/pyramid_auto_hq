@@ -65,30 +65,6 @@ class FormRenderer(_sf_renderers.FormRenderer):
             setattr(self, name, renderer)
         return super(FormRenderer, self).__init__(*args, **kwargs)
 
-
-    # def radiogroup_row(self, name, options, selected_value=None, id=None, **attrs):
-    #     id = id or ('input_%s' % name)
-    #     selected_value = selected_value if selected_value is not None else self.data.get(name)
-    #     controls = ""
-    #     index = 0
-    #     for opt in options:
-    #         value, label = opt
-    #         checked = 'checked="checked"' if selected_value == value else ''
-    #         radio = u'<label class="radio inline">' \
-    #                     u'<input type="radio" id="%(id)s" name="%(name)s" value="%(value)s" %(checked)s>' \
-    #                     u'%(label)s' \
-    #                 u'</label>' % {
-    #             'id': id + ('_%d' %index),
-    #             'name': name,
-    #             'value': value,
-    #             'checked': checked,
-    #             'label': label,
-    #         }
-    #         controls = controls + radio
-    #         index += 1
-    #
-    #     return self._form_group(name, controls, id, **attrs)
-
     def smart_render(self):
         schema = self.form.schema
         fields_order = copy.copy(schema.smart_fields_order) \
@@ -98,4 +74,37 @@ class FormRenderer(_sf_renderers.FormRenderer):
                 fields_order.append(field_name)
         return "\n".join([self.smart_input_row(name) for name in fields_order])
 
+    @staticmethod
+    def errors_to_ajax_response(form):
+        errors = []
+        for field, err_msg in form.errors.items():
+            errors.append((field, err_msg))
+        return errors
+
+    @property
+    def js_to_show_errors(self):
+        return """<script type="text/javascript">
+jQuery(function ($) {
+    $.fn.show_error_for_field = function(field, err_msg) {
+        var $form = $(this)
+        var $input = $form.find("[name=" + field + "]")
+        $input.each(function (idx, el) {
+            var $el = $(el)
+            var $frmGrp = $el.parents(".form-group").first()
+            var $err = $frmGrp.find(".help-block")
+            $frmGrp.addClass("has-error")
+            $err.html("<small><em>" + err_msg + "</em></small>")
+        })
+    }
+
+    $.fn.show_errors = function (errors) {
+        var fn, err_msg
+        for (i=0;i<errors.length;i++) {
+            fn = errors[i][0]
+            err_msg = errors[i][1]
+            $(this).show_error_for_field(fn, err_msg)
+        }
+    }
+})
+</script>"""
 from horizontal import HorizontalFormRenderer
