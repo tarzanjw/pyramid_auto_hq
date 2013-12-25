@@ -13,11 +13,20 @@ class RowRenderer(object):
 
     @property
     def form(self):
+        """
+        @rtype: FormRenderer
+        """
         return self.form_renderer.form
 
     @property
     def schema(self):
         return self.form.schema
+
+    def populate_element_id(self, prefix, id):
+        return self.form_renderer.populate_element_id(prefix, id)
+
+    def populate_form_group_id(self, id):
+        return self.form_renderer.populate_form_group_id(id)
 
 class FormRendererMetaClass(type):
     def __new__(meta, class_name, bases, new_attrs):
@@ -31,6 +40,23 @@ class FormRenderer(_sf_renderers.FormRenderer):
     __metaclass__ = FormRendererMetaClass
     __child_renderers__ = {}
 
+    def populate_element_id(self, prefix, id):
+        return prefix + '-' + id
+
+    def populate_form_group_id(self, id):
+        return self.populate_element_id('frmGrp', id)
+
+    def populate_error_message_id(self, id):
+        return self.populate_element_id('errMsg', id)
+
+    def populate_input_id(self, name, **attrs):
+        try:
+            id_ = attrs['id']
+            if not id_:
+                raise KeyError
+        except KeyError:
+            id_ = 'input-%s' % name
+        return id_
 
     def __init__(self, *args, **kwargs):
         for name, renderer in self.__child_renderers__.items():

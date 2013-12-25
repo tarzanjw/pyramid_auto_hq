@@ -5,7 +5,7 @@ from webhelpers.html.builder import format_attrs
 
 class HorizontalRowRenderer(RowRenderer):
     def _render_error(self, name, **attrs):
-        return self.form_renderer._render_error(name, **attrs)
+        return self.form_renderer.render_error(name, **attrs)
 
     def _form_group(self, name, controls, id=None,  **attrs):
         attrs = self.form_renderer.attributes_for_row(**attrs)
@@ -24,7 +24,7 @@ class HorizontalRowRenderer(RowRenderer):
         attrs_html = format_attrs(**attrs)
         error_html, error_css = self._render_error(name, id=id, **attrs)
         return u"""
-<div class="%(classes)s%(error_css)s" %(attrs_html)s>
+<div id="%(frm_grp_id)s" class="%(classes)s%(error_css)s" %(attrs_html)s>
     <label class="col-lg-2 control-label" for="%(id)s">%(label)s</label>
     <div class="col-lg-10">
         %(controls)s
@@ -32,6 +32,7 @@ class HorizontalRowRenderer(RowRenderer):
     </div>
 </div>
 """ % {
+            'frm_grp_id': self.populate_form_group_id(id),
             'classes': class_,
             'error_css': error_css,
             'attrs_html': attrs_html,
@@ -74,28 +75,17 @@ class HorizontalFormRenderer(FormRenderer):
 
     _input_attrs = ['id', 'options', 'selected_value',]
 
-    def populate_input_id(self, name, **attrs):
-        try:
-            id_ = attrs['id']
-            if not id_:
-                raise KeyError
-        except KeyError:
-            id_ = 'input_%s' % name
-        return id_
-
-    def _render_error(self, name, **attrs):
-        id = self.populate_input_id(name, **attrs)
+    def render_error(self, name, **attrs):
+        id = self.populate_error_message_id(self.populate_input_id(name, **attrs))
         if self.is_error(name):
             error_list = self.errors_for(name)
-            error_html = ""
-            for err in error_list:
-                error_html = error_html + u'<span style="" id="%s_em_" class="help-block">' \
-                                            u'<small><em>%s</em></small>' \
-                                          u'</span>' % (id, err)
+            error_msgs = [u'<small><em>%s</em></small>' % err for err in error_list]
             error_css = u' has-error'
         else:
-            error_html = u''
+            error_msgs = []
             error_css = u''
+        error_html = u'<span style="" id="%s" class="help-block">%s</span>' \
+                     % (id, u"<br/>".join(error_msgs))
         return error_html, error_css
 
     def attributes_for_row(self, **attrs):
@@ -119,3 +109,29 @@ class HorizontalFormRenderer(FormRenderer):
     checkboxlist_row = HorizontalCheckboxListRowRenderer()
     radiogroup_row = RadioGroupRowRenderer()
 
+    @property
+    def js_to_show_errors(self):
+        return """<script type="text/javascript">
+jQuery(function ($) {
+    $.fn.show_error_for_field = function(field, err_msg) {
+        var $form = $(this)
+        var $input = $form.find("[name=" + field + "]")
+        $input.each(function (idx, el) {
+            var $el = $(el)
+            var $frmGrp = $el.parents(".form-group").first()
+            var $err = $frmGrp.find(".help-block")
+            $frmGrp.addClass("has-error")
+            $err.html("<small><em>" + err_msg + "</em></small>")
+        })
+    }
+
+    $.fn.show_errors = function (errors) {
+        var fn, err_msg
+        for (i=0;i<errors.length;i++) {
+            fn = errors[i][0]
+            err_msg = errors[i][1]
+            $(this).show_error_for_field(fn, err_msg)
+        }
+    }
+})
+</script>"""
