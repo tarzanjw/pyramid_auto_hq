@@ -8,7 +8,7 @@ from lib.bootstrap_renderer import HorizontalFormRenderer
 from pyramid.httpexceptions import HTTPNotFound, HTTPFound
 from webhelpers.paginate import Page, PageURL_WebOb
 from . import AutoHQResource, ModelResource
-from sqlalchemy.orm.properties import RelationProperty, ColumnProperty
+from sqlalchemy.orm.properties import RelationshipProperty, ColumnProperty
 from sqlalchemy.orm.attributes import InstrumentedAttribute
 from pyramid.decorator import reify
 import inspect
@@ -211,7 +211,7 @@ class ModelView(object):
             attr = getattr(model, attr_name)
             if isinstance(attr, InstrumentedAttribute):
                 p = attr.property
-                if isinstance(p, RelationProperty):
+                if isinstance(p, RelationshipProperty):
                     if not p.uselist:
                         _fks.append(attr_name)
         return _fks
@@ -224,7 +224,7 @@ class ModelView(object):
             attr = getattr(self.Object, attr_name)
             if isinstance(attr, InstrumentedAttribute):
                 p = attr.property
-                if isinstance(p, RelationProperty):
+                if isinstance(p, RelationshipProperty):
                     if p.uselist:
                         rel_model = p.argument() if inspect.isroutine(p.argument) \
                             else p.argument
