@@ -97,7 +97,8 @@ class HorizontalFormRenderer(FormRenderer):
             if k in self._input_attrs:
                 _attrs[k] = v
             if k.startswith('input_'):
-                _attrs[k[6:]] = v
+                _k = k[6:].replace("_","-")
+                _attrs[_k] = v
 
         return _attrs
 
