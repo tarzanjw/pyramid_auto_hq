@@ -30,8 +30,6 @@ class CheckBoxRowRenderer(HorizontalRowRenderer):
             pass
         error_html, error_css = self._render_error(name, **attrs)
 
-        print self.form.data[name]
-
         return u"""<div class="%(class)s%(error_css)s">
     <div class="col-lg-offset-2 col-lg-10">
         <div class="checkbox">

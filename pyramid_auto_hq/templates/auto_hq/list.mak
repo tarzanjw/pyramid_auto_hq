@@ -1,4 +1,4 @@
-<%inherit file="./_layout.mak" />
+<%inherit file="_layout.mak" />
 
 <%block name="page_title">${view.Object.__name__} list</%block>
 
