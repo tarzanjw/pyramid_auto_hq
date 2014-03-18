@@ -13,7 +13,7 @@ USAGE
 CHANGES
 -------
 
-### 0.1.1
+### 0.1.3
 
 1. Packaging, Initialize
 2. Fix bugs in package's configuration

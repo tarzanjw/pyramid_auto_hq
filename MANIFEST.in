@@ -1,1 +1,2 @@
 include *.md
+recursive-include pyramid_auto_hq *.mak *.mako *.css *.js
